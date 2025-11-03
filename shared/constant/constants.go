@@ -74,6 +74,7 @@ type ImageGenerationCall string                     // Always "image_generation_
 type ImageGenerationCompleted string                // Always "image_generation.completed"
 type ImageGenerationPartialImage string             // Always "image_generation.partial_image"
 type ImageURL string                                // Always "image_url"
+type VideoURL string                                // Always "video_url"
 type InputAudio string                              // Always "input_audio"
 type InputFile string                               // Always "input_file"
 type InputImage string                              // Always "input_image"
@@ -281,6 +282,7 @@ func (c ImageGenerationPartialImage) Default() ImageGenerationPartialImage {
 	return "image_generation.partial_image"
 }
 func (c ImageURL) Default() ImageURL                         { return "image_url" }
+func (c VideoURL) Default() VideoURL                         { return "video_url" }
 func (c InputAudio) Default() InputAudio                     { return "input_audio" }
 func (c InputFile) Default() InputFile                       { return "input_file" }
 func (c InputImage) Default() InputImage                     { return "input_image" }
@@ -568,6 +570,7 @@ func (c ImageGenerationCall) MarshalJSON() ([]byte, error)                   { r
 func (c ImageGenerationCompleted) MarshalJSON() ([]byte, error)              { return marshalString(c) }
 func (c ImageGenerationPartialImage) MarshalJSON() ([]byte, error)           { return marshalString(c) }
 func (c ImageURL) MarshalJSON() ([]byte, error)                              { return marshalString(c) }
+func (c VideoURL) MarshalJSON() ([]byte, error)                              { return marshalString(c) }
 func (c InputAudio) MarshalJSON() ([]byte, error)                            { return marshalString(c) }
 func (c InputFile) MarshalJSON() ([]byte, error)                             { return marshalString(c) }
 func (c InputImage) MarshalJSON() ([]byte, error)                            { return marshalString(c) }

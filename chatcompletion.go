@@ -847,12 +847,13 @@ type ChatCompletionContentPartUnionParam struct {
 	OfText       *ChatCompletionContentPartTextParam       `json:",omitzero,inline"`
 	OfImageURL   *ChatCompletionContentPartImageParam      `json:",omitzero,inline"`
 	OfInputAudio *ChatCompletionContentPartInputAudioParam `json:",omitzero,inline"`
+	OfVideoURL   *ChatCompletionContentPartVideoParam      `json:",omitzero,inline"`
 	OfFile       *ChatCompletionContentPartFileParam       `json:",omitzero,inline"`
 	paramUnion
 }
 
 func (u ChatCompletionContentPartUnionParam) MarshalJSON() ([]byte, error) {
-	return param.MarshalUnion(u, u.OfText, u.OfImageURL, u.OfInputAudio, u.OfFile)
+	return param.MarshalUnion(u, u.OfText, u.OfImageURL, u.OfInputAudio, u.OfFile, u.OfVideoURL)
 }
 func (u *ChatCompletionContentPartUnionParam) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, u)
@@ -867,6 +868,8 @@ func (u *ChatCompletionContentPartUnionParam) asAny() any {
 		return u.OfInputAudio
 	} else if !param.IsOmitted(u.OfFile) {
 		return u.OfFile
+	} else if !param.IsOmitted(u.OfVideoURL) {
+		return u.OfVideoURL
 	}
 	return nil
 }
@@ -891,6 +894,13 @@ func (u ChatCompletionContentPartUnionParam) GetImageURL() *ChatCompletionConten
 func (u ChatCompletionContentPartUnionParam) GetInputAudio() *ChatCompletionContentPartInputAudioInputAudioParam {
 	if vt := u.OfInputAudio; vt != nil {
 		return &vt.InputAudio
+	}
+	return nil
+}
+
+func (u ChatCompletionContentPartUnionParam) GetVideoURL() *ChatCompletionContentPartVideoVideoURLParam {
+	if vt := u.OfVideoURL; vt != nil {
+		return &vt.VideoURL
 	}
 	return nil
 }
@@ -1108,6 +1118,78 @@ func (r *ChatCompletionContentPartInputAudioInputAudioParam) UnmarshalJSON(data 
 func init() {
 	apijson.RegisterFieldValidator[ChatCompletionContentPartInputAudioInputAudioParam](
 		"format", "wav", "mp3",
+	)
+}
+
+type ChatCompletionContentPartVideo struct {
+	VideoURL ChatCompletionContentPartVideoVideoURLParam `json:"video_url,required"`
+	// The type of the content part.
+	Type constant.ImageURL `json:"type,required"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		ImageURL    respjson.Field
+		Type        respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+func (r ChatCompletionContentPartVideo) ToParam() ChatCompletionContentPartVideoParam {
+	return param.Override[ChatCompletionContentPartVideoParam](json.RawMessage(r.RawJSON()))
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatCompletionContentPartVideo) RawJSON() string { return r.JSON.raw }
+
+func (r *ChatCompletionContentPartVideo) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+type ChatCompletionContentPartVideoParam struct {
+	VideoURL ChatCompletionContentPartVideoVideoURLParam `json:"video_url,omitzero,required"`
+	// The type of the content part.
+	//
+	// This field can be elided, and will marshal its zero value as "image_url".
+	Type constant.VideoURL `json:"type,required"`
+	paramObj
+}
+
+func (r ChatCompletionContentPartVideoParam) MarshalJSON() (data []byte, err error) {
+	type shadow ChatCompletionContentPartVideoParam
+	return param.MarshalObject(r, (*shadow)(&r))
+}
+func (r *ChatCompletionContentPartVideoParam) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func VideoContentPart(videoURL ChatCompletionContentPartVideoVideoURLParam) ChatCompletionContentPartUnionParam {
+	var variant ChatCompletionContentPartVideoParam
+	variant.VideoURL = videoURL
+	return ChatCompletionContentPartUnionParam{OfVideoURL: &variant}
+}
+
+type ChatCompletionContentPartVideoVideoURLParam struct {
+	// Either a URL of the image or the base64 encoded image data.
+	URL string `json:"url,required" format:"uri"`
+	// Specifies the detail level of the image. Learn more in the
+	// [Vision guide](https://platform.openai.com/docs/guides/vision#low-or-high-fidelity-image-understanding).
+	//
+	// Any of "auto", "low", "high".
+	Detail string `json:"detail,omitzero"`
+	paramObj
+}
+
+func (r ChatCompletionContentPartVideoVideoURLParam) MarshalJSON() (data []byte, err error) {
+	type shadow ChatCompletionContentPartVideoVideoURLParam
+	return param.MarshalObject(r, (*shadow)(&r))
+}
+func (r *ChatCompletionContentPartVideoVideoURLParam) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func init() {
+	apijson.RegisterFieldValidator[ChatCompletionContentPartVideoVideoURLParam](
+		"detail", "auto", "low", "high",
 	)
 }
 
