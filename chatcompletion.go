@@ -2438,7 +2438,28 @@ type ChatCompletionNewParams struct {
 	// about the
 	// [web search tool](https://platform.openai.com/docs/guides/tools-web-search?api-mode=chat).
 	WebSearchOptions ChatCompletionNewParamsWebSearchOptions `json:"web_search_options,omitzero"`
+
+	SeparateReasoning param.Opt[bool] `json:"separate_reasoning,omitempty"`
+
+	// Chat template keyword arguments
+	ChatTemplateKwargs ChatCompletionChatTemplateKwargsParam `json:"chat_template_kwargs,omitempty"`
+
 	paramObj
+}
+
+type ChatCompletionChatTemplateKwargsParam struct {
+	// Whether to enable thinking/reasoning in the chat template
+	Thinking param.Opt[bool] `json:"thinking,omitempty"`
+	paramObj
+}
+
+func (r ChatCompletionChatTemplateKwargsParam) MarshalJSON() (data []byte, err error) {
+	type shadow ChatCompletionChatTemplateKwargsParam
+	return param.MarshalObject(r, (*shadow)(&r))
+}
+
+func (r *ChatCompletionChatTemplateKwargsParam) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
 }
 
 func (r ChatCompletionNewParams) MarshalJSON() (data []byte, err error) {
