@@ -2526,7 +2526,29 @@ type ChatCompletionNewParams struct {
 
 	// Whether to stream back partial progress. If set, tokens will be sent as data-only
 	Stream param.Opt[bool] `json:"stream,omitzero"`
+
+	// Whether to separate reasoning content from the response
+	SeparateReasoning param.Opt[bool] `json:"separate_reasoning,omitempty"`
+
+	// Chat template keyword arguments
+	ChatTemplateKwargs ChatCompletionChatTemplateKwargsParam `json:"chat_template_kwargs,omitempty"`
+
 	paramObj
+}
+
+type ChatCompletionChatTemplateKwargsParam struct {
+	// Whether to enable thinking/reasoning in the chat template
+	Thinking param.Opt[bool] `json:"thinking,omitempty"`
+	paramObj
+}
+
+func (r ChatCompletionChatTemplateKwargsParam) MarshalJSON() (data []byte, err error) {
+	type shadow ChatCompletionChatTemplateKwargsParam
+	return param.MarshalObject(r, (*shadow)(&r))
+}
+
+func (r *ChatCompletionChatTemplateKwargsParam) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
 }
 
 func (r ChatCompletionNewParams) MarshalJSON() (data []byte, err error) {
